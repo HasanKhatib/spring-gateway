@@ -1,0 +1,28 @@
+server:
+  port: 8081
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+
+spring:
+  main:
+    web-application-type: reactive
+    allow-bean-definition-overriding: true
+
+  cloud:
+    gateway:
+      routes:
+        - id: random-meme
+          uri: ${BE_SERVICE_URL:http://localhost:8080}
+          predicates:
+            - Path=/random-meme/**
+      default-filters:
+        - AddRequestHeader=X-Tenant,acme
+        - TokenRelay # this filter will pass access token as an http header
+
+logging:
+  level:
+    root: info

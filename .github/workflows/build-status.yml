@@ -1,0 +1,60 @@
+name: Code check - Build
+
+on:
+  pull_request:
+    types:
+      - opened
+      - synchronize
+      - reopened
+    # In case we want to trigger the workflow on PRs opened to master
+    #branches:
+    #  - 'master'
+env:
+  DOCKLE_HOST: "unix:///var/run/docker.sock"
+
+jobs:
+  code-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Setup Java
+        uses: actions/setup-java@v1
+        with:
+          java-version: '17'
+
+      - name: Set JAVA_HOME
+        run: echo "::set-output name=path::$JAVA_HOME"
+
+      - name: Slugify github variables
+        uses: rlespinasse/github-slug-action@v3.x
+
+      - name: Gradle Build
+        run: |
+          gradle clean build
+
+
+      - name: Docker local build
+        run: |
+          docker build -t curametdevops.jfrog.io/default-docker-virtual/spring-gateway-app:local-${{ github.sha }} .
+
+      - name: Docker local scan
+        uses: azure/container-scan@v0
+        if: false
+        with:
+          fail-build: true
+          severity-threshold: CRITICAL
+          image-name: app:local-${{ github.sha }}
+          timeout: 10m
+
+      - name: Login to JFrog
+        uses: docker/login-action@v1
+        with:
+          registry: curametdevops.jfrog.io
+          username: hasan.alkhatib@curamet.se
+          password: ${{ secrets.ARTIFACTORY_PWD }}
+
+      - name: Docker push
+        run: |
+          docker push curametdevops.jfrog.io/default-docker-virtual/spring-gateway-app:local-${{ github.sha }}
