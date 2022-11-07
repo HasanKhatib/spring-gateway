@@ -1,6 +1,0 @@
-general:
-  vulnerabilities:
-    - CVE-2022-22965 # application won't be deployed as war, hence it's safe
-    - CVE-2022-22965 # application won't be deployed as war, hence it's safe
-    - CVE-2022-22965 # application won't be deployed as war, hence it's safe
-  bestPracticeViolations:
