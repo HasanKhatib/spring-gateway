@@ -21,7 +21,6 @@ public class SecurityConf {
     return http.csrf().disable()
       .authorizeExchange()
       .anyExchange().hasAnyAuthority("API_USER")
-//      .anyExchange().authenticated()
       .and().httpBasic()
       .and().build();
   }
